@@ -1,19 +1,47 @@
 import { CsvFileReader } from "./CsvFileReader";
-import { MatchResult } from "./MatchResults";
+import { MatchReader } from "./MatchReader";
+import { WinsAnalysis } from "./analyzers/WinsAnalysis"
+import { ConsoleReports } from "./reportTargets/consoleReports";
+import { Summary } from "./Summary";
+import { HtmlReport } from "./reportTargets/HtmlReport";
 
-const reader = new CsvFileReader('football.csv');
+// -- interface implementation
+//  1. Create an object that satisfies the 'DataReader' interface
+// const csvFileReader = new CsvFileReader('football.csv');
 
-reader.read();
+// // 2. Create an instance of MatchReader and pass in the object that satisfies the 'DataReader' interface
+// const matchReader = new MatchReader(csvFileReader);
 
-let manUnitedWins = 0;
+//a little refactor, using static methods to hide implementation of newing up new objects
+const matchReader = MatchReader.fromCsv('football.csv');
+matchReader.load();
 
-for (const match of reader.data) {
-    if (match[1] === 'Man United' && match[5] === MatchResult.HomeWin) {
-        manUnitedWins++;
-    }else if(match[2] === 'Man United' && match[5] === MatchResult.AwayWin){
-        manUnitedWins++;
-    }
-}
+//3. Next we create 2 objects that satisfies our Analyzer and OutputTarget interfaces
+const analyzer = new WinsAnalysis('Man United');
+// const outputTarget = new ConsoleReports();
+const outputTarget = new HtmlReport();
 
-console.log(`ManU has won ${manUnitedWins} times`);
+//4. Finally use these objects as input into out Summary class
+const summary = new Summary(analyzer, outputTarget);
+summary.buildAndPrintReport(matchReader.matches);
 
+
+
+
+
+
+
+// -- For inheritance
+// const reader = new MatchReader('football.csv');
+// reader.read();
+
+//let manUnitedWins = 0;
+
+//for inheritance
+// for (const match of reader.data) {
+//     if (match[1] === 'Man United' && match[5] === MatchResult.HomeWin) {
+//         manUnitedWins++;
+//     }else if(match[2] === 'Man United' && match[5] === MatchResult.AwayWin){
+//         manUnitedWins++;
+//     }
+// }
